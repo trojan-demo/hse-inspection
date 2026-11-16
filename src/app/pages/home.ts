@@ -16,7 +16,7 @@ export class Home {
     {
       role: 'Employer',
       name: 'Modon Properties',
-      image: 'src/assets/images/modon.jpg',
+      image: 'assets/images/modon.jpg',
       
 
       detail: 'Master Developer · Maysan Al Reem Island',
@@ -24,19 +24,19 @@ export class Home {
     {
       role: 'PMC',
       name: 'EllisDon',
-      image: 'src/assets/images/ellisdon.png',
+      image: 'assets/images/ellisdon.png',
       detail: 'Project Management Consultancy',
     },
     {
       role: 'Consultant',
       name: 'Khatib & Alami',
-      image: 'src/assets/images/khatib.png',
+      image: 'assets/images/khatib.png',
       detail: 'Lead Engineering & Supervision Consultant',
     },
     {
       role: 'Contractor',
       name: 'Trojan Construction Holding',
-      image: 'src/assets/images/trojan.png',
+      image: 'assets/images/trojan.png',
       detail: 'Main Building & Civil Contractor (TGC)',
     },
   ];
