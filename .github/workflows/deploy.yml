@@ -36,15 +36,30 @@ jobs:
       - name: Build Angular project
         run: npm run build -- --configuration production --base-href /hse-inspection/
 
-      - name: Prepare deployment files
+      - name: Find browser output
         run: |
-          PAGES_DIR=$(dirname "$(find dist -type f -name index.html | head -n 1)")
-          if [ ! -f "$PAGES_DIR/index.html" ]; then
-            echo "Angular build output index.html not found"
-            exit 1
+          if [ -f dist/app/browser/index.html ]; then
+            PAGES_DIR="dist/app/browser"
+          else
+            INDEX_FILE=$(find dist -type f -path '*/browser/index.html' -print -quit)
+            if [ -z "$INDEX_FILE" ]; then
+              INDEX_FILE=$(find dist -type f -name index.html -not -path '*/server/*' -print -quit)
+            fi
+
+            if [ -z "$INDEX_FILE" ]; then
+              echo "Browser index.html not found"
+              exit 1
+            fi
+
+            PAGES_DIR=$(dirname "$INDEX_FILE")
           fi
+
+          echo "Deploying: $PAGES_DIR"
+          ls -la "$PAGES_DIR"
+
           cp "$PAGES_DIR/index.html" "$PAGES_DIR/404.html"
           touch "$PAGES_DIR/.nojekyll"
+
           echo "PAGES_DIR=$PAGES_DIR" >> "$GITHUB_ENV"
 
       - name: Upload Pages artifact
@@ -53,12 +68,12 @@ jobs:
           path: ${{ env.PAGES_DIR }}
 
   deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-    needs: build
 
     steps:
       - name: Deploy to GitHub Pages
