@@ -1,0 +1,66 @@
+
+name: Deploy Angular to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular project
+        run: npm run build -- --configuration production --base-href /hse-inspection/
+
+      - name: Prepare deployment files
+        run: |
+          PAGES_DIR=$(dirname "$(find dist -type f -name index.html | head -n 1)")
+          if [ ! -f "$PAGES_DIR/index.html" ]; then
+            echo "Angular build output index.html not found"
+            exit 1
+          fi
+          cp "$PAGES_DIR/index.html" "$PAGES_DIR/404.html"
+          touch "$PAGES_DIR/.nojekyll"
+          echo "PAGES_DIR=$PAGES_DIR" >> "$GITHUB_ENV"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ env.PAGES_DIR }}
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
