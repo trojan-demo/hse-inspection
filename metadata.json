@@ -1,6 +1,5 @@
 {
   "name": "Trojan Construction HSE Inspection Portal",
   "description": "Daily Site HSE Inspection and Performance Evaluation Portal for Maysan Development Phase I TG2164 at Al Reem Island.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": []
 }

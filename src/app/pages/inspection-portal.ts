@@ -213,6 +213,48 @@ export class InspectionPortal {
     }
   }
 
+  isSectionAllNa(category: {items: {id: string}[]}): boolean {
+    const answers = this.checklistAnswers();
+    return category.items.length > 0 && category.items.every((item) => answers[item.id] === 'NA');
+  }
+
+  toggleSectionNa(category: {items: {id: string}[]}): void {
+    const allNa = this.isSectionAllNa(category);
+    const nextValue = allNa ? '5' : 'NA';
+    this.checklistAnswers.update((curr) => {
+      const updated = {...curr};
+      category.items.forEach((item) => {
+        updated[item.id] = nextValue;
+      });
+      return updated;
+    });
+  }
+
+  getCategoryScoreLabel(category: {items: {id: string}[]}): string {
+    if (this.isSectionAllNa(category)) {
+      return 'Section NA';
+    }
+    const answers = this.checklistAnswers();
+    let earned = 0;
+    let possible = 0;
+    let naItems = 0;
+    category.items.forEach((item) => {
+      const val = answers[item.id] || '';
+      if (val === 'NA') {
+        naItems++;
+      } else {
+        const num = Number(val);
+        if (!Number.isNaN(num) && num >= 1 && num <= 5) {
+          earned += num;
+          possible += 5;
+        }
+      }
+    });
+    if (possible === 0) {
+      return naItems > 0 ? 'NA' : `${category.items.length} items`;
+    }
+    return `${earned} / ${possible} marks`;
+  }
   getRatingButtonClass(current: string | undefined, option: string): string {
     if (current !== option) {
       return 'bg-white text-slate-600 border-slate-300 hover:border-blue-400 hover:text-blue-900';

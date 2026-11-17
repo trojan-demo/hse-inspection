@@ -62,14 +62,20 @@ export class PdfExport {
     let computedMax = 0;
 
     categories.forEach((cat) => {
+         const allCategoryNa =
+        cat.items.length > 0 &&
+        cat.items.every((item) => submission.checklist[item.id] === 'NA');
+
       tableBody.push([
         {
-          content: `${cat.categoryCode}. ${cat.categoryName}`,
+          content: allCategoryNa
+            ? `${cat.categoryCode}. ${cat.categoryName}  [NA]`
+            : `${cat.categoryCode}. ${cat.categoryName}`,
           colSpan: 4,
           styles: {
             fontStyle: 'bold',
-            fillColor: [219, 234, 254], // soft sky blue
-            textColor: [15, 76, 129],
+            fillColor: allCategoryNa ? [241, 245, 249] : [219, 234, 254],
+            textColor: allCategoryNa ? [71, 85, 105] : [15, 76, 129],
           },
         },
       ]);
