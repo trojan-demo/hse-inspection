@@ -7,6 +7,9 @@ import {
   TASK_SUPERVISOR_LIST,
 } from '../data/hse-checklist';
 
+import {ObservationReportSubmission} from '../data/observation-report';
+
+
 export interface InspectionStats {
   totalChecked: number;
   ratedCount: number;
@@ -46,7 +49,6 @@ export interface FormTemplate {
   title: string;
   code: string;
   category: string;
-  description: string;
   isActive: boolean;
   totalItems: number;
   badge: string;
@@ -133,13 +135,7 @@ export class HseStore {
           this.recentSubmissions.set(parsed);
         }
       }
-      const savedTemplates = window.localStorage.getItem(TEMPLATES_STORAGE_KEY);
-      if (savedTemplates) {
-        const parsedTemplates = JSON.parse(savedTemplates) as FormTemplate[];
-        if (Array.isArray(parsedTemplates) && parsedTemplates.length > 0) {
-          this.formTemplates.set(parsedTemplates);
-        }
-      }
+      
     } catch {
       // Ignore corrupt storage entries
     }
@@ -170,17 +166,17 @@ export class HseStore {
     }
   }
 
-  addNewFormTemplate(template: FormTemplate): void {
-    const next = [...this.formTemplates(), template];
-    this.formTemplates.set(next);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Ignore
-      }
-    }
-  }
+  // addNewFormTemplate(template: FormTemplate): void {
+  //   const next = [...this.formTemplates(), template];
+  //   this.formTemplates.set(next);
+  //   if (typeof window !== 'undefined' && window.localStorage) {
+  //     try {
+  //       window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(next));
+  //     } catch {
+  //       // Ignore
+  //     }
+  //   }
+  // }
 
   generateWhatsAppUrl(submission: HseInspectionSubmission, filename?: string): string {
     const pdfName =
@@ -242,6 +238,71 @@ export class HseStore {
     return `mailto:savad.salim@trojan.ae?subject=${subject}&body=${body}`;
   }
 
+  generateObservationWhatsAppUrl(report: ObservationReportSubmission, filename?: string): string {
+    const pdfName = filename || `HSE_Observation_Report_${report.reportNo || 'DRAFT'}.pdf`;
+    const obsLines = report.observations.map((obs, idx) => {
+      const code = obs.secondaryHazardCode
+        ? `${obs.hazardCode || '—'}&${obs.secondaryHazardCode}`
+        : (obs.hazardCode || '—');
+      return `${obs.sn || idx + 1}. [${code}] ${obs.hazardHeading || obs.hazardDetails || 'Observation'} (${obs.category || 'Unrated'})`;
+    });
+
+    const text = [
+      '*HSE OBSERVATION REPORT*',
+      `Report No.: ${report.reportNo || '—'}`,
+      `Project: ${report.project || '—'}`,
+      `Location: ${report.location || '—'}`,
+      `Date / Time: ${report.preparedByDate || '—'} ${report.time || ''}`.trim(),
+      `Prepared By: ${report.preparedByName || '—'} (${report.preparedByCompany || '—'})`,
+      `Submitted To: ${report.submittedToName || '—'} (${report.submittedToCompany || '—'})`,
+      '',
+      ...obsLines,
+      '',
+      `PDF File: ${pdfName}`,
+    ].join('\n');
+
+    return `https://wa.me/?text=${encodeURIComponent(text)}`;
+  }
+
+  generateObservationMailtoUrl(report: ObservationReportSubmission, filename?: string): string {
+    const pdfName = filename || `HSE_Observation_Report_${report.reportNo || 'DRAFT'}.pdf`;
+    const subject = encodeURIComponent(
+      `[HSE Observation Report ${report.reportNo || ''}] ${report.project || 'Trojan Construction'} - ${report.location || ''}`.trim(),
+    );
+    const obsLines = report.observations.map((obs, idx) => {
+      const code = obs.secondaryHazardCode
+        ? `${obs.hazardCode || '—'}&${obs.secondaryHazardCode}`
+        : (obs.hazardCode || '—');
+      return [
+        `SN ${obs.sn || String(idx + 1).padStart(2, '0')} | Hazard Code: ${code} | Category: ${obs.category || '—'} | Target Date: ${obs.completionDate || '—'}`,
+        `Hazards/Aspects: ${[obs.hazardHeading, obs.hazardDetails].filter(Boolean).join(' - ') || '—'}`,
+        `Risk/Impact: ${obs.riskImpact || '—'}`,
+        `Recommended Action: ${obs.correctiveAction || '—'}`,
+        `Responsible Person: ${obs.responsiblePerson || '—'}`,
+      ].join('\n');
+    });
+
+    const body = encodeURIComponent(
+      [
+        'TROJAN GENERAL CONTRACTING LLC - HSE OBSERVATION REPORT',
+        `Form: ${report.formCode} (${report.revision})`,
+        `Report No.: ${report.reportNo || '—'}`,
+        `Project: ${report.project || '—'}`,
+        `Location: ${report.location || '—'}`,
+        `Time: ${report.time || '—'}`,
+        `Prepared By: ${report.preparedByName || '—'} (${report.preparedByJobTitle || '—'}, ${report.preparedByCompany || '—'}) · ${report.preparedByDate || '—'}`,
+        `Submitted To: ${report.submittedToName || '—'} (${report.submittedToJobTitle || '—'}, ${report.submittedToCompany || '—'}) · ${report.submittedToDate || '—'}`,
+        '',
+        ...obsLines,
+        '',
+        `Attached PDF Filename: ${pdfName}`,
+      ].join('\n\n'),
+    );
+
+    return `mailto:?subject=${subject}&body=${body}`;
+  }
+
+
   private getDefaultForms(): FormTemplate[] {
     return [
       {
@@ -249,11 +310,20 @@ export class HseStore {
         title: 'Daily Site HSE Inspection / Performance Evaluation',
         code: 'HSE-FRM-01',
         category: 'Daily Operations & Safety Auditing',
-        description:
-          'Demo daily site HSE performance checklist (Sections A–J) with 1–5/NA ratings, remarks, and dual sign-off.',
+        
         isActive: true,
         totalItems: 47,
-        badge: 'Demo Form',
+        badge: 'Default Form',
+         },
+      {
+        id: 'hse-observation-report',
+        title: 'HSE Observation Report',
+        code: 'TGC/FRM/HSE/019',
+        category: 'Hazard Observation & Corrective Action',
+       
+        isActive: true,
+        totalItems: 9,
+        badge: 'Rev:-01',
       },
     ];
   }

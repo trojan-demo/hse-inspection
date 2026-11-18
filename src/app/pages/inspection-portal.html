@@ -4,6 +4,18 @@
     <div class="bg-white rounded-2xl border border-blue-200 p-5 sm:p-6 shadow-xs">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="space-y-1">
+           @if (activeTab() === 'observation-form') {
+            <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-blue-700">
+              <span>TGC/FRM/HSE/019</span>
+              <span aria-hidden="true">·</span>
+              <span>Trojan General Contracting LLC</span>
+              <span aria-hidden="true">·</span>
+              <!-- <span class="text-emerald-700">Rev:-01</span> -->
+            </div>
+            <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">
+              HSE Observation Report
+            </h1>
+          } @else {
           <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-blue-700">
             <span>HSE-FRM-01</span>
             <span aria-hidden="true">·</span>
@@ -14,6 +26,7 @@
           <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">
             Daily Site HSE Inspection / Performance Evaluation
           </h1>
+        }
         </div>
 
         <!-- Segmented Workspace Tabs -->
@@ -49,7 +62,7 @@
             (click)="activeTab.set('forms-catalog')"
             class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
             [class]="
-              activeTab() === 'forms-catalog'
+             activeTab() === 'forms-catalog' || activeTab() === 'observation-form'
                 ? 'bg-blue-800 text-white shadow-xs'
                 : 'text-slate-700 hover:text-blue-900 hover:bg-white'
             "
@@ -167,7 +180,6 @@
               <select
                 id="field-supervisor"
                 formControlName="supervisorName"
-                (change)="onSupervisorChanged()"
                 class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
               >
                 @for (sup of supervisorList; track sup.id) {
@@ -593,26 +605,14 @@
       </section>
     }
 
-    <!-- TAB 3: FORM TEMPLATES (ONE SMALL DEMO FORM) -->
+     <!-- TAB 3: FORM TEMPLATES (DAILY HSE INSPECTION & HSE OBSERVATION REPORT ONLY) -->
     @if (activeTab() === 'forms-catalog') {
       <section class="bg-white rounded-2xl border border-blue-200 p-5 sm:p-6 shadow-xs space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-100 pb-4">
-          <div>
-            <h2 class="font-display font-bold text-xl text-slate-900">
-              Safety Form Templates
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">
-              Demo template ready for Maysan Development Phase I TG2164.
-            </p>
-          </div>
-          <button
-            type="button"
-            (click)="showNewFormModal.set(true)"
-            class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-          >
-            <mat-icon class="!text-sm !w-4 !h-4">add_circle</mat-icon>
-            <span>Register New Template</span>
-          </button>
+        <div class="border-b border-blue-100 pb-4">
+          <h2 class="font-display font-bold text-xl text-slate-900">
+            Safety Form Templates
+          </h2>
+          
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -625,19 +625,24 @@
                 </div>
                 <h3 class="font-display font-bold text-lg text-slate-900">{{ tpl.title }}</h3>
                 <div class="text-xs font-medium text-slate-500">{{ tpl.category }}</div>
-                <p class="text-xs text-slate-600 leading-relaxed">{{ tpl.description }}</p>
+                <!-- <p class="text-xs text-slate-600 leading-relaxed">{{ tpl.description }}</p> -->
               </div>
 
               <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-                <span class="text-xs font-medium text-slate-600 tabular-nums">
-                  {{ tpl.totalItems }} Checkpoints
-                </span>
+                <!-- <span class="text-xs font-medium text-slate-600 tabular-nums">
+                  @if (tpl.id === 'hse-observation-report') {
+                    <span>9 Columns · Photo &amp; A–S Hazard Dropdown</span>
+                  } @else {
+                    <span>{{ tpl.totalItems }} Checkpoints</span>
+                  }
+                </span> -->
                 <button
                   type="button"
-                  (click)="activeTab.set('active-form')"
-                  class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer"
+                  (click)="openTemplate(tpl.id)"
+                  class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
                 >
-                  Open Form
+                  <mat-icon class="!text-sm !w-4 !h-4">open_in_new</mat-icon>
+                  <span>Open Form</span>
                 </button>
               </div>
             </div>
@@ -645,6 +650,12 @@
         </div>
       </section>
     }
+    
+    <!-- TAB 4: HSE OBSERVATION REPORT (OPENED FROM TEMPLATES) -->
+    @if (activeTab() === 'observation-form') {
+      <app-observation-report (backToTemplates)="activeTab.set('forms-catalog')" />
+    }
+
   </div>
 
   <!-- SAVED & DISPATCH MODAL -->
@@ -804,91 +815,5 @@
     </div>
   }
 
-  <!-- REGISTER NEW FORM TEMPLATE MODAL -->
-  @if (showNewFormModal()) {
-    <div class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl border border-blue-200 max-w-md w-full p-6 shadow-xl space-y-4">
-        <div class="flex items-center justify-between border-b border-blue-100 pb-3">
-          <h3 class="font-display font-bold text-lg text-slate-900">Register New Template</h3>
-          <button
-            type="button"
-            (click)="showNewFormModal.set(false)"
-            class="text-slate-400 hover:text-slate-700 cursor-pointer"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-
-        <form [formGroup]="newFormGroup" (ngSubmit)="handleCreateNewForm()" class="space-y-3.5 text-xs">
-          <div class="space-y-1">
-            <label for="tpl-title" class="font-bold text-slate-700 uppercase">Form Title</label>
-            <input
-              id="tpl-title"
-              type="text"
-              formControlName="title"
-              placeholder="e.g., Excavation Safety Permit"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600"
-            />
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1">
-              <label for="tpl-code" class="font-bold text-slate-700 uppercase">Form Code</label>
-              <input
-                id="tpl-code"
-                type="text"
-                formControlName="code"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600"
-              />
-            </div>
-            <div class="space-y-1">
-              <label for="tpl-items" class="font-bold text-slate-700 uppercase">Checkpoints</label>
-              <input
-                id="tpl-items"
-                type="number"
-                formControlName="totalItems"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600"
-              />
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <label for="tpl-cat" class="font-bold text-slate-700 uppercase">Category</label>
-            <input
-              id="tpl-cat"
-              type="text"
-              formControlName="category"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600"
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label for="tpl-desc" class="font-bold text-slate-700 uppercase">Description</label>
-            <textarea
-              id="tpl-desc"
-              formControlName="description"
-              rows="3"
-              class="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600"
-            ></textarea>
-          </div>
-
-          <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-            <button
-              type="button"
-              (click)="showNewFormModal.set(false)"
-              class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer"
-            >
-              Save Template
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
+ 
 </div>

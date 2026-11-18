@@ -1,0 +1,862 @@
+<div class="space-y-6">
+  <!-- Top Sub-Navigation & Official Banner -->
+  <section class="bg-white rounded-2xl border border-blue-200 shadow-xs overflow-hidden">
+    <div class="px-5 py-3 bg-blue-50/70 border-b border-blue-100 flex flex-wrap items-center justify-between gap-3">
+      <button
+        type="button"
+        (click)="backToTemplates.emit()"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-800 hover:text-blue-950 cursor-pointer"
+      >
+        <mat-icon class="!text-base !w-4 !h-4">arrow_back</mat-icon>
+        <span>Back to Templates</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-xs text-slate-600">
+        <span class="font-mono font-bold text-blue-900">{{ headerForm.controls.formCode.value }}</span>
+        <span aria-hidden="true">·</span>
+        <span class="font-semibold text-emerald-700">{{ headerForm.controls.revision.value }}</span>
+      </div>
+    </div>
+
+    <div class="p-5 sm:p-6 space-y-5">
+      <!-- Official Trojan Report Title Strip -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-blue-100">
+        <div class="flex items-center gap-3.5">
+          <img
+            src="trojanlogo.png"
+            alt="Trojan General Contracting LLC"
+            class="w-12 h-12 object-contain shrink-0 rounded-lg border border-blue-100 bg-white p-1"
+            referrerpolicy="no-referrer"
+          />
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-blue-900">
+              Trojan General Contracting LLC · Health, Safety and Environment
+            </div>
+            <h2 class="font-display text-xl sm:text-2xl font-extrabold text-slate-900">
+              HSE OBSERVATION REPORT
+            </h2>
+          </div>
+        </div>
+
+        <div class="w-full md:w-64 space-y-1">
+          <label
+            for="obs-report-no"
+            class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+          >
+            Report No.:
+          </label>
+          <input
+            id="obs-report-no"
+            type="text"
+            [formControl]="headerForm.controls.reportNo"
+            placeholder="e.g. HSE/SOR/032"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+      </div>
+
+      <!-- Project / Location / Time -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div class="md:col-span-6 space-y-1">
+          <label
+            for="obs-project"
+              class="flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider"
+          >
+            <span>Project:</span>
+            
+          </label>
+          <input
+            id="obs-project"
+            type="text"
+            [formControl]="headerForm.controls.project"
+            readonly
+            class="w-full rounded-lg border border-blue-200 bg-blue-50/60 px-3.5 py-2 text-sm font-semibold text-blue-950 focus:outline-none cursor-default"
+          />
+        </div>
+
+        <div class="md:col-span-4 space-y-1">
+          <label
+            for="obs-location"
+            class="flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider"
+          >
+            <span>Location:</span>
+           
+          </label>
+          <input
+            id="obs-location"
+            type="text"
+            [formControl]="headerForm.controls.location"
+            readonly
+            class="w-full rounded-lg border border-blue-200 bg-blue-50/60 px-3.5 py-2 text-sm font-semibold text-blue-950 focus:outline-none cursor-default" />
+        </div>
+
+        <div class="md:col-span-2 space-y-1">
+          <label
+            for="obs-time"
+            class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+          >
+            Time:
+          </label>
+          <input
+            id="obs-time"
+            type="text"
+            [formControl]="headerForm.controls.time"
+            placeholder="e.g. 02:30 PM"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+      </div>
+
+      <!-- PREPARED BY & SUBMITTED TO -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-2">
+        <!-- Prepared By Card -->
+        <div class="rounded-xl border border-blue-200 bg-blue-50/30 p-4 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-blue-900">
+            <mat-icon class="!text-base !w-4 !h-4 text-blue-700">person_outline</mat-icon>
+            <span>Prepared By:</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label for="prep-job" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Job Title / Designation
+              </label>
+              <input
+                id="prep-job"
+                type="text"
+                [formControl]="headerForm.controls.preparedByJobTitle"
+                placeholder="e.g. HSE - TGC"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="prep-name" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Name
+              </label>
+              <input
+                id="prep-name"
+                type="text"
+                [formControl]="headerForm.controls.preparedByName"
+                placeholder="Write name..."
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="prep-company" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Company
+              </label>
+              <input
+                id="prep-company"
+                type="text"
+                [formControl]="headerForm.controls.preparedByCompany"
+                placeholder="e.g. TGC"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="prep-date" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Date
+              </label>
+              <input
+                id="prep-date"
+                type="date"
+                [formControl]="headerForm.controls.preparedByDate"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 tabular-nums focus:outline-none focus:border-blue-600"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <span class="block text-[11px] font-bold text-slate-600 uppercase">Signature</span>
+            <app-signature-pad
+              label="Prepared By Signature"
+              [signatureText]="preparedByNameSignal()"
+              [signatureImage]="preparedBySigImage()"
+              (signatureImageChange)="preparedBySigImage.set($event)"
+            />
+          </div>
+        </div>
+
+        <!-- Submitted To Card -->
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-emerald-900">
+            <mat-icon class="!text-base !w-4 !h-4 text-emerald-700">assignment_ind</mat-icon>
+            <span>Submitted To:</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label for="sub-job" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Job Title / Designation
+              </label>
+              <input
+                id="sub-job"
+                type="text"
+                [formControl]="headerForm.controls.submittedToJobTitle"
+                placeholder="e.g. ENGINEER - NPC"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="sub-name" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Name
+              </label>
+              <input
+                id="sub-name"
+                type="text"
+                [formControl]="headerForm.controls.submittedToName"
+                placeholder="Write recipient name..."
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="sub-company" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Company
+              </label>
+              <input
+                id="sub-company"
+                type="text"
+                [formControl]="headerForm.controls.submittedToCompany"
+                placeholder="e.g. NPC"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label for="sub-date" class="block text-[11px] font-bold text-slate-600 uppercase">
+                Date
+              </label>
+              <input
+                id="sub-date"
+                type="date"
+                [formControl]="headerForm.controls.submittedToDate"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 tabular-nums focus:outline-none focus:border-blue-600"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <span class="block text-[11px] font-bold text-slate-600 uppercase">Signature</span>
+            <app-signature-pad
+              label="Submitted To Signature"
+              [signatureText]="submittedToNameSignal()"
+              [signatureImage]="submittedToSigImage()"
+              (signatureImageChange)="submittedToSigImage.set($event)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HAZARD CODE REFERENCE KEY (A–S) -->
+  <section class="bg-white rounded-2xl border border-blue-200 shadow-xs overflow-hidden">
+    <button
+      type="button"
+      (click)="showHazardLegend.set(!showHazardLegend())"
+      class="w-full px-5 py-3 bg-blue-900 text-white flex items-center justify-between gap-3 text-left cursor-pointer"
+    >
+      <div class="flex items-center gap-2">
+        <mat-icon class="!text-base !w-4 !h-4 text-emerald-300">warning_amber</mat-icon>
+        <span class="font-display font-bold text-xs sm:text-sm uppercase tracking-wider">
+          Hazard Code Legend (A – S)
+        </span>
+      </div>
+      <span class="text-xs text-blue-100 inline-flex items-center gap-1">
+        <span>{{ showHazardLegend() ? 'Hide' : 'Show' }}</span>
+        <mat-icon class="!text-base !w-4 !h-4">
+          {{ showHazardLegend() ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </span>
+    </button>
+
+    @if (showHazardLegend()) {
+      <div class="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-2 bg-slate-50/70">
+        @for (hz of hazardOptions; track hz.code) {
+          <div class="rounded-lg border border-blue-100 bg-white px-2.5 py-2 text-center">
+            <div class="font-mono font-extrabold text-xs text-blue-800">{{ hz.code }}.</div>
+            <div class="text-[11px] text-slate-700 leading-tight mt-0.5">{{ hz.label }}</div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- OBSERVATION ROWS (UNFILLED, DYNAMIC) -->
+  <section class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h3 class="font-display font-bold text-lg text-slate-900">
+          Site Observations ({{ observations().length }})
+        </h3>
+      </div>
+      <button
+        type="button"
+        (click)="addObservationRow()"
+        class="px-4 py-2 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+      >
+        <mat-icon class="!text-base !w-4 !h-4">add_circle</mat-icon>
+        <span>Add Observation Row</span>
+      </button>
+    </div>
+
+    @for (row of observations(); track row.id; let idx = $index) {
+      <div class="bg-white rounded-2xl border border-blue-200 shadow-xs overflow-hidden">
+        <!-- Row Bar -->
+        <div class="bg-blue-50 border-b border-blue-100 px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="px-2.5 py-1 rounded-md bg-blue-900 text-white font-mono font-bold text-xs tabular-nums">
+              SN {{ row.sn }}
+            </span>
+            <span class="text-xs font-bold text-blue-900">
+              Hazard Code:
+              <span class="text-emerald-700">{{ getCombinedHazardLabel(row) }}</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
+              <label
+                [attr.for]="'sn-' + row.id"
+                class="text-[11px] font-bold text-slate-600 uppercase"
+              >
+                SN:
+              </label>
+              <input
+                [id]="'sn-' + row.id"
+                type="text"
+                [value]="row.sn"
+                (input)="updateRowField(row.id, 'sn', $event)"
+                class="w-14 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-mono font-bold text-center text-slate-900 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+
+            @if (observations().length > 1) {
+              <button
+                type="button"
+                (click)="removeObservationRow(row.id)"
+                class="px-2.5 py-1 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">delete</mat-icon>
+                <span>Remove</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Column 1: Hazard Code Dropdown + Photo Capture/Attach -->
+          <div class="lg:col-span-4 space-y-4">
+            <!-- Hazard Code Dropdown -->
+            <div class="space-y-1.5">
+              <label
+                [attr.for]="'hz-primary-' + row.id"
+                class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+              >
+                Hazard Code (Dropdown)
+              </label>
+              <select
+                [id]="'hz-primary-' + row.id"
+                [value]="row.hazardCode"
+                (change)="updateRowField(row.id, 'hazardCode', $event)"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">-- Select Hazard Code (A–S) --</option>
+                @for (hz of hazardOptions; track hz.code) {
+                  <option [value]="hz.code">{{ hz.code }} — {{ hz.label }}</option>
+                }
+              </select>
+
+              @if (row.hazardCode) {
+                <div class="pt-1">
+                  <label
+                    [attr.for]="'hz-sec-' + row.id"
+                    class="block text-[11px] font-semibold text-slate-500 mb-1"
+                  >
+                    Optional 2nd Hazard Code (e.g. A&amp;B)
+                  </label>
+                  <select
+                    [id]="'hz-sec-' + row.id"
+                    [value]="row.secondaryHazardCode"
+                    (change)="updateRowField(row.id, 'secondaryHazardCode', $event)"
+                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-600"
+                  >
+                    <option value="">None (Single Hazard Code)</option>
+                    @for (hz of hazardOptions; track hz.code) {
+                      @if (hz.code !== row.hazardCode) {
+                        <option [value]="hz.code">&amp; {{ hz.code }} — {{ hz.label }}</option>
+                      }
+                    }
+                  </select>
+                </div>
+              }
+            </div>
+
+            <!-- PHOTO (Initial Inspection) -->
+            <div class="space-y-2 rounded-xl border border-blue-100 bg-slate-50/70 p-3.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Photo (Initial Inspection)
+                </span>
+                <span class="text-[11px] font-semibold text-emerald-700">
+                  {{ row.photos.length }} attached
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <label
+                  class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <mat-icon class="!text-base !w-4 !h-4">photo_camera</mat-icon>
+                  <span>Take Photo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    (change)="onPhotosSelected(row.id, $event)"
+                    class="hidden"
+                  />
+                </label>
+
+                <label
+                  class="px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <mat-icon class="!text-base !w-4 !h-4">add_photo_alternate</mat-icon>
+                  <span>Attach Image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    (change)="onPhotosSelected(row.id, $event)"
+                    class="hidden"
+                  />
+                </label>
+              </div>
+
+              @if (row.photos.length === 0) {
+                <div class="py-5 px-3 rounded-lg border border-dashed border-blue-200 bg-white text-center text-xs text-slate-400">
+                  Take a camera photo or attach image(s) from device.
+                </div>
+              } @else {
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  @for (photo of row.photos; track photo.id) {
+                    <div class="relative rounded-lg overflow-hidden border border-slate-200 bg-white group">
+                      <img
+                        [src]="photo.dataUrl"
+                        [alt]="photo.name"
+                        class="w-full h-28 object-cover"
+                        referrerpolicy="no-referrer"
+                      />
+                      <button
+                        type="button"
+                        (click)="removePhoto(row.id, photo.id)"
+                        title="Remove photo"
+                        class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-xs cursor-pointer"
+                      >
+                        <mat-icon class="!text-sm !w-4 !h-4">close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Responsible Person, Category, Completion Date -->
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label
+                  [attr.for]="'resp-' + row.id"
+                  class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                >
+                  Responsible Person
+                </label>
+                <input
+                  [id]="'resp-' + row.id"
+                  type="text"
+                  [value]="row.responsiblePerson"
+                  (input)="updateRowField(row.id, 'responsiblePerson', $event)"
+                  placeholder="Enter responsible person..."
+                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div class="space-y-1">
+                  <label
+                    [attr.for]="'cat-' + row.id"
+                    class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                  >
+                    Category
+                  </label>
+                  <select
+                    [id]="'cat-' + row.id"
+                    [value]="row.category"
+                    (change)="updateRowField(row.id, 'category', $event)"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-600"
+                  >
+                    <option value="">-- Select --</option>
+                    @for (cat of categoryOptions; track cat.value) {
+                      <option [value]="cat.value">{{ cat.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="space-y-1">
+                  <label
+                    [attr.for]="'comp-date-' + row.id"
+                    class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                  >
+                    Date (To be completed)
+                  </label>
+                  <input
+                    [id]="'comp-date-' + row.id"
+                    type="date"
+                    [value]="row.completionDate"
+                    (input)="updateRowField(row.id, 'completionDate', $event)"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-900 tabular-nums focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Narrative Columns (Hazards/Aspects, Risk/Impact, Recommended Action) -->
+          <div class="lg:col-span-8 grid grid-cols-1 gap-4">
+            <div class="space-y-1.5">
+              <label
+                [attr.for]="'hz-head-' + row.id"
+                class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+              >
+                Hazards / Aspects
+                <span class="font-normal normal-case text-slate-500">
+                  (Unsafe Action / Condition / Plant / Tools / Equipment / Environmental)
+                </span>
+              </label>
+              <input
+                [id]="'hz-head-' + row.id"
+                type="text"
+                [value]="row.hazardHeading"
+                (input)="updateRowField(row.id, 'hazardHeading', $event)"
+                placeholder="Observation heading (optional)..."
+                class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+              />
+              <textarea
+                [attr.aria-label]="'Hazards or aspects details for observation ' + (idx + 1)"
+                rows="4"
+                [value]="row.hazardDetails"
+                (input)="updateRowField(row.id, 'hazardDetails', $event)"
+                placeholder="Describe unsafe act, condition, location, and observations..."
+                class="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              ></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label
+                  [attr.for]="'risk-' + row.id"
+                  class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                >
+                  Risk / Impact
+                </label>
+                <textarea
+                  [id]="'risk-' + row.id"
+                  rows="5"
+                  [value]="row.riskImpact"
+                  (input)="updateRowField(row.id, 'riskImpact', $event)"
+                  placeholder="Describe potential injury, hazard escalation, or site impact..."
+                  class="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                ></textarea>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  [attr.for]="'action-' + row.id"
+                  class="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                >
+                  Recommended Corrective Action
+                </label>
+                <textarea
+                  [id]="'action-' + row.id"
+                  rows="5"
+                  [value]="row.correctiveAction"
+                  (input)="updateRowField(row.id, 'correctiveAction', $event)"
+                  placeholder="Enter corrective actions.."
+                  class="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- FOOTER SIGN-OFF BLOCK (Prepared By/TGC & Approved By/TGC) -->
+  <section class="bg-white rounded-2xl border border-blue-200 p-5 sm:p-6 shadow-xs space-y-5">
+    <div class="flex items-center gap-2 border-b border-blue-100 pb-3">
+      <mat-icon class="!text-lg !w-5 !h-5 text-blue-800">verified_user</mat-icon>
+      <h3 class="font-display font-bold text-base text-slate-900">
+        Report Sign-Off (TRG)
+      </h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Prepared By/TGC -->
+      <div class="rounded-xl border border-blue-100 bg-slate-50/70 p-4 space-y-3">
+        <div class="text-xs font-extrabold uppercase tracking-wider text-blue-900">
+          Prepared By /TGC
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label for="f-prep-name" class="block text-[11px] font-bold text-slate-600 uppercase">
+              Name
+            </label>
+            <input
+              id="f-prep-name"
+              type="text"
+              [formControl]="headerForm.controls.footerPreparedByName"
+              placeholder="Write name..."
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+            />
+          </div>
+          <div class="space-y-1">
+            <label for="f-prep-title" class="block text-[11px] font-bold text-slate-600 uppercase">
+              Title / Position
+            </label>
+            <input
+              id="f-prep-title"
+              type="text"
+              [formControl]="headerForm.controls.footerPreparedByTitle"
+              placeholder="e.g. HSE Officer"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+            />
+          </div>
+        </div>
+        <div class="space-y-1">
+          <span class="block text-[11px] font-bold text-slate-600 uppercase">Signature</span>
+          <app-signature-pad
+            label="Prepared By /TGC Signature"
+            [signatureText]="footerPreparedByNameSignal()"
+            [signatureImage]="footerPreparedBySigImage()"
+            (signatureImageChange)="footerPreparedBySigImage.set($event)"
+          />
+        </div>
+      </div>
+
+      <!-- Approved By/TGC -->
+      <div class="rounded-xl border border-emerald-100 bg-slate-50/70 p-4 space-y-3">
+        <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-900">
+          Approved By /TGC
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label for="f-app-name" class="block text-[11px] font-bold text-slate-600 uppercase">
+              Name
+            </label>
+            <input
+              id="f-app-name"
+              type="text"
+              [formControl]="headerForm.controls.footerApprovedByName"
+              placeholder="Write name..."
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+            />
+          </div>
+          <div class="space-y-1">
+            <label for="f-app-title" class="block text-[11px] font-bold text-slate-600 uppercase">
+              Title / Position
+            </label>
+            <input
+              id="f-app-title"
+              type="text"
+              [formControl]="headerForm.controls.footerApprovedByTitle"
+              placeholder="e.g. Project Manager"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
+            />
+          </div>
+        </div>
+        <div class="space-y-1">
+          <span class="block text-[11px] font-bold text-slate-600 uppercase">Signature</span>
+          <app-signature-pad
+            label="Approved By /TGC Signature"
+            [signatureText]="footerApprovedByNameSignal()"
+            [signatureImage]="footerApprovedBySigImage()"
+            (signatureImageChange)="footerApprovedBySigImage.set($event)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTION BAR: PREVIEW, DOWNLOAD PDF, SEND -->
+    <div class="pt-4 border-t border-blue-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          (click)="resetForm()"
+          class="px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+        >
+          <mat-icon class="!text-base !w-4 !h-4">refresh</mat-icon>
+          <span>Clear Form</span>
+        </button>
+        @if (savedPdfFilename()) {
+          <span class="text-xs font-medium text-emerald-700">
+            Ready: {{ savedPdfFilename() }}
+          </span>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          (click)="openPdfPreview()"
+          [disabled]="isGeneratingPdf()"
+          class="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+        >
+          <mat-icon class="!text-base !w-4 !h-4">visibility</mat-icon>
+          <span>Preview PDF</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="downloadPdf()"
+          [disabled]="isGeneratingPdf()"
+          class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+        >
+          <mat-icon class="!text-base !w-4 !h-4">picture_as_pdf</mat-icon>
+          <span>Download PDF</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="openSendOptions()"
+          class="px-4 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+        >
+          <mat-icon class="!text-base !w-4 !h-4">send</mat-icon>
+          <span>Send Report</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEND OPTIONS MODAL -->
+  @if (showSendModal()) {
+    <div class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl border border-blue-200 max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-center shrink-0">
+              <mat-icon>send</mat-icon>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-lg text-slate-900">
+                Send HSE Observation Report
+              </h3>
+              <p class="text-xs text-slate-500">
+                {{ savedPdfFilename() }}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="showSendModal.set(false)"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="space-y-2.5">
+          <button
+            type="button"
+            (click)="downloadPdf()"
+            class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <mat-icon class="!text-base !w-4 !h-4">download</mat-icon>
+            <span>Download PDF File</span>
+          </button>
+
+          @if (canNativeShare()) {
+            <button
+              type="button"
+              (click)="shareNative()"
+              class="w-full py-2.5 px-4 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">share</mat-icon>
+              <span>Share PDF Directly</span>
+            </button>
+          }
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <a
+              [href]="whatsappUrl()"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="py-2.5 px-3 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-1.5"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">chat</mat-icon>
+              <span>WhatsApp</span>
+            </a>
+
+            <a
+              [href]="mailtoUrl()"
+              class="py-2.5 px-3 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold flex items-center justify-center gap-1.5"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">email</mat-icon>
+              <span>Email</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- IN-APP PDF PREVIEW MODAL -->
+  @if (pdfPreviewUrl()) {
+    <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl border border-blue-200 max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden shadow-xl">
+        <div class="px-5 py-3.5 bg-blue-900 text-white flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 min-w-0">
+            <mat-icon class="!text-lg !w-5 !h-5 text-emerald-300">picture_as_pdf</mat-icon>
+            <span class="font-display font-bold text-sm truncate">
+              PDF Preview — {{ savedPdfFilename() || 'HSE Observation Report' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              (click)="downloadPdf()"
+              class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">download</mat-icon>
+              <span>Download</span>
+            </button>
+            <button
+              type="button"
+              (click)="openSendOptions()"
+              class="px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">send</mat-icon>
+              <span>Send</span>
+            </button>
+            <button
+              type="button"
+              (click)="closePdfPreview()"
+              class="p-1.5 rounded-lg bg-blue-800 hover:bg-blue-700 text-white cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">close</mat-icon>
+            </button>
+          </div>
+        </div>
+        <iframe
+          [src]="pdfPreviewUrl()"
+          title="HSE Observation Report PDF Preview"
+          class="flex-1 w-full bg-slate-100"
+        ></iframe>
+      </div>
+    </div>
+  }
+</div>

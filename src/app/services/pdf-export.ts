@@ -6,6 +6,11 @@ import {
   FIXED_PROJECT_NAME,
   FIXED_SITE_LOCATION,
 } from '../data/hse-checklist';
+import {
+  HAZARD_CODE_OPTIONS,
+  ObservationReportSubmission,
+} from '../data/observation-report';
+
 import {HseInspectionSubmission} from './hse-store';
 
 interface JsPdfWithAutoTable extends jsPDF {
@@ -16,6 +21,8 @@ interface JsPdfWithAutoTable extends jsPDF {
 
 @Injectable({providedIn: 'root'})
 export class PdfExport {
+    private cachedLogoDataUrl: string | null = null;
+
   buildDocument(
     submission: HseInspectionSubmission,
     categories: ChecklistCategory[],
@@ -367,6 +374,599 @@ export class PdfExport {
         await navigator.share({
           title: 'Daily Site HSE Inspection Report',
           text: `${submission.projectName} · ${submission.levelZone} (${submission.date})`,
+          files: [file],
+        });
+        return true;
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  }
+  private async loadLogoDataUrl(): Promise<string | undefined> {
+    if (this.cachedLogoDataUrl) {
+      return this.cachedLogoDataUrl;
+    }
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return undefined;
+    }
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const loaded = await new Promise<HTMLImageElement>((resolve, reject) => {
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load logo'));
+        img.src = 'trojanlogo.png';
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = loaded.naturalWidth || 200;
+      canvas.height = loaded.naturalHeight || 200;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return undefined;
+      }
+      ctx.drawImage(loaded, 0, 0);
+      this.cachedLogoDataUrl = canvas.toDataURL('image/png');
+      return this.cachedLogoDataUrl;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private drawObservationPageHeader(
+    doc: JsPdfWithAutoTable,
+    reportNo: string,
+    logoDataUrl?: string,
+  ): void {
+    const margin = 10;
+    const usableW = doc.internal.pageSize.getWidth() - margin * 2; // 277mm
+    const topY = 8;
+    const totalH = 16.5;
+    const logoW = 28;
+    const reportNoW = 55;
+    const centerW = usableW - logoW;
+
+    // Outer frame
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, topY, usableW, totalH);
+
+    // Logo box
+    doc.line(margin + logoW, topY, margin + logoW, topY + totalH);
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, 'PNG', margin + 6.5, topY + 1, 15, 14.5);
+      } catch {
+        // Ignore logo error
+      }
+    }
+
+    // 3 Title rows
+    const rowH = totalH / 3;
+    doc.line(margin + logoW, topY + rowH, margin + usableW, topY + rowH);
+    doc.line(margin + logoW, topY + rowH * 2, margin + usableW, topY + rowH * 2);
+
+    // Report No divider on bottom row
+    const reportBoxX = margin + usableW - reportNoW;
+    doc.line(reportBoxX, topY + rowH * 2, reportBoxX, topY + totalH);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(9.5);
+    doc.text(
+      'TROJAN GENERAL CONTRACTING LLC',
+      margin + logoW + centerW / 2,
+      topY + 4.1,
+      {align: 'center'},
+    );
+    doc.setFontSize(8.8);
+    doc.text(
+      'HEALTH, SAFETY AND ENVIRONMENT',
+      margin + logoW + centerW / 2,
+      topY + rowH + 4.0,
+      {align: 'center'},
+    );
+
+    const titleCenterW = centerW - reportNoW;
+    doc.setFontSize(9.2);
+    doc.setTextColor(15, 76, 129);
+    doc.text(
+      'HSE OBSERVATION REPORT',
+      margin + logoW + titleCenterW / 2,
+      topY + rowH * 2 + 4.1,
+      {align: 'center'},
+    );
+
+    doc.setFontSize(8.2);
+    doc.setTextColor(15, 23, 42);
+    doc.text(
+      `Report No.: ${reportNo || '—'}`,
+      reportBoxX + 2.5,
+      topY + rowH * 2 + 4.0,
+    );
+  }
+
+  buildObservationDocument(
+    report: ObservationReportSubmission,
+    logoDataUrl?: string,
+  ): jsPDF {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+    }) as JsPdfWithAutoTable;
+
+    const pageWidth = doc.internal.pageSize.getWidth(); // 297
+    const pageHeight = doc.internal.pageSize.getHeight(); // 210
+    const margin = 10;
+
+    // 1. Project / Routing / Signatures Header Table
+    autoTable(doc, {
+      startY: 26.5,
+      margin: {left: margin, right: margin, top: 26.5, bottom: 13},
+      theme: 'grid',
+      styles: {
+        fontSize: 7.5,
+        cellPadding: 1.8,
+        lineColor: [51, 65, 85],
+        lineWidth: 0.25,
+        textColor: [15, 23, 42],
+        valign: 'middle',
+      },
+      body: [
+        [
+          {
+            content: `Project: ${report.project || '—'}`,
+            colSpan: 3,
+            styles: {fontStyle: 'bold', fillColor: [248, 250, 252]},
+          },
+          {
+            content: `Location: ${report.location || '—'}`,
+            colSpan: 2,
+            styles: {fontStyle: 'bold', fillColor: [248, 250, 252]},
+          },
+          {
+            content: `Time: ${report.time || '—'}`,
+            styles: {fontStyle: 'bold', fillColor: [248, 250, 252]},
+          },
+        ],
+        [
+          {content: 'REPORT', styles: {fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'JOB TITLE/ DESIGNATION', styles: {fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'NAME', styles: {fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'COMPANY', styles: {fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'SIGNATURE', styles: {fontStyle: 'bold', halign: 'center', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'DATE', styles: {fontStyle: 'bold', halign: 'center', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+        ],
+        [
+          {content: 'PREPARED BY:', styles: {fontStyle: 'bold'}},
+          report.preparedByJobTitle || '—',
+          report.preparedByName || '—',
+          report.preparedByCompany || '—',
+          {
+            content: report.preparedBySignatureImage
+              ? ''
+              : (report.preparedByName || '—'),
+            styles: {
+              halign: 'center',
+              fontStyle: 'italic',
+              textColor: [15, 76, 129],
+              minCellHeight: report.preparedBySignatureImage ? 11 : 6,
+            },
+          },
+          {content: report.preparedByDate || '—', styles: {halign: 'center'}},
+        ],
+        [
+          {content: 'SUBMITTED TO:', styles: {fontStyle: 'bold'}},
+          report.submittedToJobTitle || '—',
+          report.submittedToName || '—',
+          report.submittedToCompany || '—',
+          {
+            content: report.submittedToSignatureImage
+              ? ''
+              : (report.submittedToName || '—'),
+            styles: {
+              halign: 'center',
+              fontStyle: 'italic',
+              textColor: [4, 120, 87],
+              minCellHeight: report.submittedToSignatureImage ? 11 : 6,
+            },
+          },
+          {content: report.submittedToDate || '—', styles: {halign: 'center'}},
+        ],
+      ],
+      columnStyles: {
+        0: {cellWidth: 34},
+        1: {cellWidth: 52},
+        2: {cellWidth: 68},
+        3: {cellWidth: 36},
+        4: {cellWidth: 55},
+        5: {cellWidth: 32},
+      },
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          if (data.row.index === 2 && report.preparedBySignatureImage) {
+            try {
+              doc.addImage(
+                report.preparedBySignatureImage,
+                'PNG',
+                data.cell.x + 12,
+                data.cell.y + 1.2,
+                30,
+                8.5,
+              );
+            } catch {
+              // Ignore
+            }
+          }
+          if (data.row.index === 3 && report.submittedToSignatureImage) {
+            try {
+              doc.addImage(
+                report.submittedToSignatureImage,
+                'PNG',
+                data.cell.x + 12,
+                data.cell.y + 1.2,
+                30,
+                8.5,
+              );
+            } catch {
+              // Ignore
+            }
+          }
+        }
+      },
+    });
+
+    // 2. Hazard Code Reference Strip (A–S)
+    const hazardCodesRow = HAZARD_CODE_OPTIONS.map((h) => ({
+      content: `${h.code}.`,
+      styles: {fontStyle: 'bold' as const, halign: 'center' as const, fillColor: [241, 245, 249] as [number, number, number]},
+    }));
+    const hazardLabelsRow = HAZARD_CODE_OPTIONS.map((h) => ({
+      content: h.label,
+      styles: {fontSize: 5.1, halign: 'center' as const, cellPadding: 1},
+    }));
+
+    autoTable(doc, {
+      startY: (doc.lastAutoTable?.finalY ?? 56) + 2,
+      margin: {left: margin, right: margin, top: 26.5, bottom: 13},
+      theme: 'grid',
+      styles: {
+        fontSize: 6.2,
+        cellPadding: 1.1,
+        lineColor: [71, 85, 105],
+        lineWidth: 0.2,
+        textColor: [15, 23, 42],
+        valign: 'middle',
+      },
+      body: [
+        [
+          {
+            content: 'HAZARD CODE',
+            colSpan: 19,
+            styles: {
+              fontStyle: 'bold',
+              fontSize: 6.8,
+              fillColor: [219, 234, 254],
+              textColor: [15, 76, 129],
+            },
+          },
+        ],
+        hazardCodesRow,
+        hazardLabelsRow,
+      ] as never,
+    });
+
+    // 3. Main Observation Table
+    const observationRows = report.observations.length > 0 ? report.observations : [];
+    const tableBody = observationRows.map((row, idx) => {
+      const codeCombined = row.secondaryHazardCode
+        ? `${row.hazardCode || '—'}&${row.secondaryHazardCode}`
+        : (row.hazardCode || '—');
+
+      const hazardsFull = [row.hazardHeading.trim(), row.hazardDetails.trim()]
+        .filter(Boolean)
+        .join('\n\n');
+
+      let categoryColor: [number, number, number] = [15, 23, 42];
+      if (row.category === 'High') {
+        categoryColor = [185, 28, 28];
+      } else if (row.category === 'Medium') {
+        categoryColor = [180, 83, 9];
+      } else if (row.category === 'Low') {
+        categoryColor = [4, 120, 87];
+      }
+
+      const photoCount = row.photos.length;
+      const minPhotoCellH = photoCount === 0 ? 18 : photoCount === 1 ? 44 : Math.min(photoCount, 3) * 34;
+
+      return [
+        {
+          content: row.sn || String(idx + 1).padStart(2, '0'),
+          styles: {halign: 'center', fontStyle: 'bold'},
+        },
+        {
+          content: codeCombined,
+          styles: {halign: 'center', fontStyle: 'bold', textColor: [15, 76, 129]},
+        },
+        {
+          content: photoCount === 0 ? 'No photo attached' : '',
+          styles: {
+            halign: 'center',
+            textColor: [148, 163, 184],
+            minCellHeight: minPhotoCellH,
+          },
+        },
+        {
+          content: hazardsFull || '—',
+          styles: {
+            textColor: row.hazardHeading.trim() ? [153, 27, 27] : [30, 41, 59],
+          },
+        },
+        row.riskImpact.trim() || '—',
+        row.correctiveAction.trim() || '—',
+        {
+          content: row.responsiblePerson.trim() || '—',
+          styles: {halign: 'center'},
+        },
+        {
+          content: row.category || '—',
+          styles: {halign: 'center', fontStyle: 'bold', textColor: categoryColor},
+        },
+        {
+          content: row.completionDate || '—',
+          styles: {halign: 'center'},
+        },
+      ];
+    });
+
+    autoTable(doc, {
+      startY: (doc.lastAutoTable?.finalY ?? 76) + 2.5,
+      margin: {left: margin, right: margin, top: 26.5, bottom: 13},
+      head: [
+        [
+          {content: 'SN', styles: {halign: 'center'}},
+          {content: 'Hazard\ncode', styles: {halign: 'center'}},
+          {content: 'PHOTO\n(Initial Inspection)', styles: {halign: 'center'}},
+          {
+            content:
+              'HAZARDS/ ASPECTS\n(Unsafe Action/ condition/ Plant /Tools/ equipment/ Environmental)',
+            styles: {halign: 'center'},
+          },
+          {content: 'RISK/\nIMPACT', styles: {halign: 'center'}},
+          {content: 'RECOMMENDED\nCORRECTIVE ACTION', styles: {halign: 'center'}},
+          {content: 'RESPONSIBLE\nPERSON', styles: {halign: 'center'}},
+          {
+            content: 'CATEGORY\n1 (High) Immediate\n2 (Medium) a day\n3 (Low) in a week',
+            styles: {halign: 'center', fontSize: 6.0},
+          },
+          {content: 'DATE\n(To be completed)', styles: {halign: 'center'}},
+        ],
+      ],
+      body: tableBody as never,
+      theme: 'grid',
+      styles: {
+        fontSize: 7.0,
+        cellPadding: 2.0,
+        lineColor: [71, 85, 105],
+        lineWidth: 0.25,
+        textColor: [15, 23, 42],
+        valign: 'middle',
+        overflow: 'linebreak',
+      },
+      headStyles: {
+        fillColor: [219, 234, 254],
+        textColor: [15, 76, 129],
+        fontStyle: 'bold',
+        fontSize: 6.7,
+        lineColor: [51, 65, 85],
+        lineWidth: 0.25,
+      },
+      columnStyles: {
+        0: {cellWidth: 9},
+        1: {cellWidth: 14},
+        2: {cellWidth: 68},
+        3: {cellWidth: 48},
+        4: {cellWidth: 38},
+        5: {cellWidth: 48},
+        6: {cellWidth: 20},
+        7: {cellWidth: 15},
+        8: {cellWidth: 17},
+      },
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 2) {
+          const row = observationRows[data.row.index];
+          if (!row || row.photos.length === 0) {
+            return;
+          }
+          const photos = row.photos.slice(0, 3);
+          const pad = 2;
+          const availW = data.cell.width - pad * 2;
+          const availH = data.cell.height - pad * 2;
+          const gap = photos.length > 1 ? 1.5 : 0;
+          const slotH = (availH - gap * (photos.length - 1)) / photos.length;
+
+          photos.forEach((photo, idx) => {
+            const natRatio = photo.width > 0 && photo.height > 0 ? photo.width / photo.height : 4 / 3;
+            let drawW = availW;
+            let drawH = drawW / natRatio;
+            if (drawH > slotH) {
+              drawH = slotH;
+              drawW = drawH * natRatio;
+            }
+            const x = data.cell.x + (data.cell.width - drawW) / 2;
+            const slotTop = data.cell.y + pad + idx * (slotH + gap);
+            const y = slotTop + (slotH - drawH) / 2;
+            try {
+              const format = photo.dataUrl.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+              doc.addImage(photo.dataUrl, format, x, y, drawW, drawH);
+            } catch {
+              // Ignore broken image
+            }
+          });
+        }
+      },
+    });
+
+    // 4. Bottom Sign-Off Block (Prepared By/TGC & Approved By/TGC)
+    const afterObsY = (doc.lastAutoTable?.finalY ?? 150) + 5;
+    const signOffStartY = afterObsY > pageHeight - 42 ? (doc.addPage(), 28) : afterObsY;
+
+    autoTable(doc, {
+      startY: signOffStartY,
+      margin: {left: margin, right: margin, top: 26.5, bottom: 13},
+      theme: 'grid',
+      styles: {
+        fontSize: 8.0,
+        cellPadding: 3.0,
+        lineColor: [51, 65, 85],
+        lineWidth: 0.25,
+        textColor: [15, 23, 42],
+        valign: 'middle',
+      },
+      head: [
+        [
+          {content: '', styles: {fillColor: [219, 234, 254]}},
+          {content: 'Name', styles: {halign: 'center', fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'Title/Position', styles: {halign: 'center', fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+          {content: 'Signature', styles: {halign: 'center', fontStyle: 'bold', fillColor: [219, 234, 254], textColor: [15, 76, 129]}},
+        ],
+      ],
+      body: [
+        [
+          {content: 'Prepared By/TGC', styles: {fontStyle: 'bold', fillColor: [241, 245, 249]}},
+          {content: report.footerPreparedByName || report.preparedByName || '—', styles: {halign: 'center'}},
+          {content: report.footerPreparedByTitle || report.preparedByJobTitle || '—', styles: {halign: 'center'}},
+          {
+            content: report.footerPreparedBySignatureImage
+              ? ''
+              : (report.footerPreparedByName || report.preparedByName || '—'),
+            styles: {
+              halign: 'center',
+              fontStyle: 'italic',
+              textColor: [15, 76, 129],
+              minCellHeight: report.footerPreparedBySignatureImage ? 14 : 9,
+            },
+          },
+        ],
+        [
+          {content: 'Approved By/TGC', styles: {fontStyle: 'bold', fillColor: [241, 245, 249]}},
+          {content: report.footerApprovedByName || '—', styles: {halign: 'center'}},
+          {content: report.footerApprovedByTitle || '—', styles: {halign: 'center'}},
+          {
+            content: report.footerApprovedBySignatureImage
+              ? ''
+              : (report.footerApprovedByName || '—'),
+            styles: {
+              halign: 'center',
+              fontStyle: 'italic',
+              textColor: [4, 120, 87],
+              minCellHeight: report.footerApprovedBySignatureImage ? 14 : 9,
+            },
+          },
+        ],
+      ],
+      columnStyles: {
+        0: {cellWidth: 46},
+        1: {cellWidth: 85},
+        2: {cellWidth: 76},
+        3: {cellWidth: 70},
+      },
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 3) {
+          if (data.row.index === 0 && report.footerPreparedBySignatureImage) {
+            try {
+              doc.addImage(
+                report.footerPreparedBySignatureImage,
+                'PNG',
+                data.cell.x + 18,
+                data.cell.y + 1.8,
+                34,
+                10,
+              );
+            } catch {
+              // Ignore
+            }
+          }
+          if (data.row.index === 1 && report.footerApprovedBySignatureImage) {
+            try {
+              doc.addImage(
+                report.footerApprovedBySignatureImage,
+                'PNG',
+                data.cell.x + 18,
+                data.cell.y + 1.8,
+                34,
+                10,
+              );
+            } catch {
+              // Ignore
+            }
+          }
+        }
+      },
+    });
+
+    // Stamp consistent header & Page X of Y footer across every page
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      this.drawObservationPageHeader(doc, report.reportNo, logoDataUrl);
+      doc.setDrawColor(100, 116, 139);
+      doc.setLineWidth(0.4);
+      doc.line(margin, pageHeight - 10, pageWidth - margin, pageHeight - 10);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(report.formCode || 'TGC/FRM/HSE/019', margin, pageHeight - 5.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 5.5, {
+        align: 'center',
+      });
+      doc.setFont('helvetica', 'normal');
+      doc.text(report.revision || 'Rev:-01', pageWidth - margin, pageHeight - 5.5, {
+        align: 'right',
+      });
+    }
+
+    return doc;
+  }
+
+  getObservationFilename(report: ObservationReportSubmission): string {
+    const cleanNo = (report.reportNo || 'DRAFT').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const cleanDate = (report.preparedByDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '');
+    return `HSE_Observation_Report_${cleanNo}_${cleanDate}.pdf`;
+  }
+
+  async downloadObservationPdf(report: ObservationReportSubmission): Promise<string> {
+    const logo = await this.loadLogoDataUrl();
+    const doc = this.buildObservationDocument(report, logo);
+    const filename = this.getObservationFilename(report);
+    doc.save(filename);
+    return filename;
+  }
+
+  async getObservationPdfBlobUrl(report: ObservationReportSubmission): Promise<string> {
+    const logo = await this.loadLogoDataUrl();
+    const doc = this.buildObservationDocument(report, logo);
+    const blob = doc.output('blob');
+    return URL.createObjectURL(blob);
+  }
+
+  async shareObservationPdfNative(report: ObservationReportSubmission): Promise<boolean> {
+    if (typeof navigator === 'undefined' || typeof navigator.share !== 'function') {
+      return false;
+    }
+    try {
+      const logo = await this.loadLogoDataUrl();
+      const doc = this.buildObservationDocument(report, logo);
+      const blob = doc.output('blob');
+      const filename = this.getObservationFilename(report);
+      const file = new File([blob], filename, {type: 'application/pdf'});
+      if (navigator.canShare && navigator.canShare({files: [file]})) {
+        await navigator.share({
+          title: `HSE Observation Report ${report.reportNo || ''}`.trim(),
+          text: `${report.project || 'Trojan Construction'} · ${report.location || ''}`.trim(),
           files: [file],
         });
         return true;

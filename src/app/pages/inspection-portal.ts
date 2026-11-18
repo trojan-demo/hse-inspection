@@ -14,6 +14,7 @@ import {
 import {MatIconModule} from '@angular/material/icon';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
+import {ObservationReport} from '../components/observation-report';
 import {SignaturePad} from '../components/signature-pad';
 import {
   FIXED_PROJECT_NAME,
@@ -27,7 +28,7 @@ import {PdfExport} from '../services/pdf-export';
 @Component({
   selector: 'app-inspection-portal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, MatIconModule, SignaturePad],
+  imports: [ReactiveFormsModule, MatIconModule, SignaturePad,ObservationReport],
   templateUrl: './inspection-portal.html',
 })
 export class InspectionPortal {
@@ -42,7 +43,7 @@ export class InspectionPortal {
   readonly supervisorList = TASK_SUPERVISOR_LIST;
   readonly ratingOptions = ['1', '2', '3', '4', '5', 'NA'];
 
-  readonly activeTab = signal<'active-form' | 'submissions' | 'forms-catalog'>('active-form');
+  readonly activeTab = signal<'active-form' | 'submissions' | 'forms-catalog' | 'observation-form'>('active-form');
   readonly checklistAnswers = signal<Record<string, string>>({});
   readonly checklistRemarks = signal<Record<string, string>>({});
   readonly supervisorSignatureImage = signal('');
@@ -57,7 +58,6 @@ export class InspectionPortal {
   private previewRecord: HseInspectionSubmission | null = null;
 
   readonly canNativeShare = signal(false);
-  readonly showNewFormModal = signal(false);
 
   readonly inspectionForm = new FormGroup({
     projectName: new FormControl(FIXED_PROJECT_NAME, {
@@ -90,13 +90,7 @@ export class InspectionPortal {
     correctiveActions: new FormControl('', {nonNullable: true}),
   });
 
-  readonly newFormGroup = new FormGroup({
-    title: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    code: new FormControl('HSE-FRM-02', {nonNullable: true, validators: [Validators.required]}),
-    category: new FormControl('Site Safety & Verification', {nonNullable: true}),
-    description: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    totalItems: new FormControl(10, {nonNullable: true}),
-  });
+  
 
   readonly supervisorNameSignal = signal(TASK_SUPERVISOR_LIST[0].name);
   readonly hsoNameSignal = signal('');
@@ -185,10 +179,10 @@ export class InspectionPortal {
     this.checklistRemarks.set({});
   }
 
-  onSupervisorChanged(): void {
-    const selected = this.inspectionForm.controls.supervisorName.value;
-    this.supervisorNameSignal.set(selected);
-  }
+  // onSupervisorChanged(): void {
+  //   const selected = this.inspectionForm.controls.supervisorName.value;
+  //   this.supervisorNameSignal.set(selected);
+  // }
 
   setAnswer(itemId: string, rating: string): void {
     this.checklistAnswers.update((curr) => ({...curr, [itemId]: rating}));
@@ -372,29 +366,11 @@ export class InspectionPortal {
     await this.pdfExport.sharePdfNative(record, this.store.checklistCategories);
   }
 
-  handleCreateNewForm(): void {
-    if (this.newFormGroup.invalid) {
-      this.newFormGroup.markAllAsTouched();
+  openTemplate(templateId: string): void {
+    if (templateId === 'hse-observation-report') {
+      this.activeTab.set('observation-form');
       return;
     }
-    const raw = this.newFormGroup.getRawValue();
-    this.store.addNewFormTemplate({
-      id: `form-${Date.now()}`,
-      title: raw.title,
-      code: raw.code,
-      category: raw.category,
-      description: raw.description,
-      isActive: true,
-      totalItems: Number(raw.totalItems) || 10,
-      badge: 'Custom Template',
-    });
-    this.showNewFormModal.set(false);
-    this.newFormGroup.reset({
-      title: '',
-      code: `HSE-FRM-0${this.store.formTemplates().length + 2}`,
-      category: 'Site Safety & Verification',
-      description: '',
-      totalItems: 10,
-    });
+    this.activeTab.set('active-form');
   }
 }
